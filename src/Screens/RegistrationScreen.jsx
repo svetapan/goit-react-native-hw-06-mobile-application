@@ -14,11 +14,10 @@ import React, { useState, useEffect } from "react";
 
 import { 
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    onAuthStateChanged,
-    updateProfile
+    updateProfile,
 } from 'firebase/auth';
-import { auth } from '../../config';
+import { collection, addDoc } from "firebase/firestore";
+import { auth, db } from '../../config';
 
 const RegistrationScreen = ({ navigation }) => {
   const [focusedInput, setFocusedInput] = useState(null);
@@ -36,10 +35,24 @@ const RegistrationScreen = ({ navigation }) => {
   const addImage = (e) => {
     e.preventDefault();
   };
-
+  
   const showHidePassword = (e) => {
     e.preventDefault();
     setShowPassword(!showPassword);
+  };
+  
+  const writeDataToFirestore = async (login,email,password) => {
+        try {
+          const docRef = await addDoc(collection(db, 'users'), {
+            login: login,
+            email: email,
+            password: password,
+          });
+          console.log('Document written with ID: ', docRef.id);
+        } catch (e) {
+          console.error('Error adding document: ', e);
+            throw e;
+        }
   };
 
   const registerDB = async (email, password) => {
@@ -50,21 +63,27 @@ const RegistrationScreen = ({ navigation }) => {
     }
   };
 
-
   const signIn = () => {
     if (isFormValid) {
       setLogin(login);
       setEmail(email);
       setPassword(password);
 
-      // console.log({ Login: login, Email: email, Password: password });
-      registerDB(email, password)
+      registerDB(email, password).then(() => {
+        updateProfile(auth.currentUser, {
+          displayName: login
+        }).then(() => {
+          navigation.navigate("Home");
+        })
+        setLogin("");
+        setEmail("");
+        setPassword("");
 
-      setLogin("");
-      setEmail("");
-      setPassword("");
-
-      // navigation.navigate("Home");
+        writeDataToFirestore(login, email, password)
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     }
   };
 

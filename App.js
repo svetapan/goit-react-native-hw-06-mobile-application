@@ -1,27 +1,27 @@
 import 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
-import RegistrationScreen from './assets/Screens/RegistrationScreen';
-import LoginScreen from './assets/Screens/LoginScreen';
-import Home from './assets/Screens/Home';
-import PostsScreen from './assets/Screens/PostsScreen';
-import CreatePostsScreen from './assets/Screens/CreatePostsScreen';
-import CommentsScreen from './assets/Screens/CommentsScreen';
-import ProfileScreen from './assets/Screens/ProfileScreen';
-import MapScreen from './assets/Screens/MapScreen';
+import RegistrationScreen from './src/Screens/RegistrationScreen';
+import LoginScreen from './src/Screens/LoginScreen';
+import Home from './src/Screens/Home';
+import PostsScreen from './src/Screens/PostsScreen';
+import CreatePostsScreen from './src/Screens/CreatePostsScreen';
+import CommentsScreen from './src/Screens/CommentsScreen';
+import ProfileScreen from './src/Screens/ProfileScreen';
+import MapScreen from './src/Screens/MapScreen';
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
 // import { Provider } from 'react-redux';
 // import { PersistGate } from 'redux-persist/integration/react';
-// import { persistor } from './assets/redux/persistor';
-// import store from './assets/redux/store'
+// import { persistor } from './src/redux/persistor';
+// import store from './src/redux/store'
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
-    "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf"),
-    "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
+    "Roboto-Regular": require("./src/fonts/Roboto-Regular.ttf"),
+    "Roboto-Bold": require("./src/fonts/Roboto-Bold.ttf"),
+    "Roboto-Medium": require("./src/fonts/Roboto-Medium.ttf"),
   });
 
   const MainStack = createStackNavigator();

@@ -11,6 +11,12 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
+import {
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+import { auth } from "../../config";
+
 const LoginScreen = ({ navigation }) => {
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -28,17 +34,34 @@ const LoginScreen = ({ navigation }) => {
     setShowPassword(!showPassword);
   };
 
+  const loginDB = async (email, password) => {
+    try {
+      const credentials = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      return credentials.user;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+
   const signIn = () => {
     if (isFormValid) {
       setEmail(email);
       setPassword(password);
 
-      console.log({ Email: email, Password: password });
-
-      setEmail("");
-      setPassword("");
-
-      navigation.navigate("Home");
+      loginDB(email, password)
+      .then(() => {
+        navigation.navigate("Home");
+        setEmail("");
+        setPassword("");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     }
   };
 
@@ -112,12 +135,10 @@ const LoginScreen = ({ navigation }) => {
               </TouchableOpacity>
               <View style={styles.redirection}>
                 <Text style={styles.redirectionText}>Немає акаунту?</Text>
-                <TouchableOpacity onPress={() => navigation.navigate("Registration")}>
-                  <Text 
-                    style={styles.redirectionLink}
-                    >
-                      Зареєструватися
-                      </Text>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Registration")}
+                >
+                  <Text style={styles.redirectionLink}>Зареєструватися</Text>
                 </TouchableOpacity>
               </View>
             </View>

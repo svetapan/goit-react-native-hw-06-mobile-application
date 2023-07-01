@@ -15,20 +15,55 @@ import * as MediaLibrary from "expo-media-library";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 
+import { auth, db } from "../../config";
+
+import { collection, getDocs, doc, updateDoc, addDoc } from "firebase/firestore";
+
 const CreatePostsScreen = ({ navigation }) => {
   const [type, setType] = useState(CameraType.back);
+
+  const [userData, setUserData] = useState(null);
 
   const [focusedInput, setFocusedInput] = useState(false);
 
   const [title, setTitle] = useState("");
   const [locationText, setLocationText] = useState("");
-  const [location, setLocation] = useState({ latitude: null, longitude: null, latitudeDelta: 0.01, longitudeDelta: 0.01 });
+  const [location, setLocation] = useState({
+    latitude: null,
+    longitude: null,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  });
 
   const [isFormValid, setIsFormValid] = useState(false);
 
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+
+  useEffect(() => {
+    const getDataFromFirestore = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "users"));
+        const currentUser = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }))
+          .filter(
+            (docData) =>
+              docData.data.email.toLowerCase() === auth.currentUser.email
+          );
+        setUserData(currentUser[0]);
+        return currentUser;
+      } catch (error) {
+        console.log(error);
+        throw error;
+      }
+    };
+
+    getDataFromFirestore();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -38,7 +73,7 @@ const CreatePostsScreen = ({ navigation }) => {
       }
     })();
   }, []);
-  
+
   useEffect(() => {
     setIsFormValid(previewImage && title && locationText);
   }, [previewImage, title, locationText]);
@@ -50,7 +85,7 @@ const CreatePostsScreen = ({ navigation }) => {
       setLocationText(locationText);
       setLocation(location);
 
-      console.log(previewImage, title, locationText, location);
+      writeDataToFirestore(previewImage, title, locationText, location)
 
       navigation.navigate("Home");
     }
@@ -61,7 +96,7 @@ const CreatePostsScreen = ({ navigation }) => {
       try {
         const { status } = await Camera.requestPermissionsAsync();
         await MediaLibrary.requestPermissionsAsync();
-  
+
         setHasPermission(status === "granted");
       } catch (error) {
         console.log("Error requesting permissions:", error);
@@ -97,6 +132,23 @@ const CreatePostsScreen = ({ navigation }) => {
   const deletePreviewImage = () => {
     setPreviewImage(null);
     setLocation({ latitude: null, longitude: null });
+  };
+
+  const writeDataToFirestore = async (previewImage, title, locationText, location) => {
+      try {
+        const docRef = await addDoc(collection(db, 'posts'), {
+          previewImage: previewImage,
+          title: title,
+          locationText: locationText,
+          location: location,
+          comments: [],
+          likes: 0,
+        });
+        console.log('Document written with ID: ', docRef.id);
+      } catch (e) {
+        console.error('Error adding document: ', e);
+          throw e;
+      }
   };
 
   return (
@@ -204,7 +256,11 @@ const CreatePostsScreen = ({ navigation }) => {
             onPress={pablishPost}
             disabled={!isFormValid}
           >
-            <Text style={[styles.buttonText, isFormValid && styles.buttonTextValid]}>Опублікувати</Text>
+            <Text
+              style={[styles.buttonText, isFormValid && styles.buttonTextValid]}
+            >
+              Опублікувати
+            </Text>
           </TouchableOpacity>
         </View>
         <View style={styles.containerButtonDel}>
@@ -368,7 +424,7 @@ const styles = StyleSheet.create({
     color: "#BDBDBD",
   },
   buttonTextValid: {
-    color: '#fff'
+    color: "#fff",
   },
   containerButtonDel: {
     marginTop: "auto",
