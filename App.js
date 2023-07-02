@@ -12,12 +12,11 @@ import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
-// import { Provider } from 'react-redux';
-// import { PersistGate } from 'redux-persist/integration/react';
-// import { persistor } from './src/redux/persistor';
-// import store from './src/redux/store'
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { persistor, store  } from './src/redux/store';
 
-export default function App() {
+const App = () => {
   const [fontsLoaded] = useFonts({
     "Roboto-Regular": require("./src/fonts/Roboto-Regular.ttf"),
     "Roboto-Bold": require("./src/fonts/Roboto-Bold.ttf"),
@@ -27,8 +26,8 @@ export default function App() {
   const MainStack = createStackNavigator();
 
   return (
-    // <Provider store={store}>
-      // <PersistGate loading={null} persistor={persistor}>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
         <NavigationContainer>
           <MainStack.Navigator initialRouteName="RegistrationScreen">
               <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
@@ -41,10 +40,12 @@ export default function App() {
               <MainStack.Screen name="Profile" component={ProfileScreen}  options={{ headerShown: false }} />
           </MainStack.Navigator>
         </NavigationContainer>
-      // </PersistGate>
-    // </Provider>
+      </PersistGate>
+    </Provider>
   );
 }
+
+export default App;
 
 const styles = StyleSheet.create({
  page: {

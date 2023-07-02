@@ -20,11 +20,6 @@ const persistConfig = {
 const reducer = persistReducer(persistConfig, rootReducer);
 
 const store = configureStore({
-  // reducer: {
-  //    userSlice: userReducer,
-  //    publicationsSlice: publicationsReducer,
-  //    postSlise: postReduser,
-  // },
   reducer,
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

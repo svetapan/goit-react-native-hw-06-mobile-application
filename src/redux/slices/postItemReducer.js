@@ -1,9 +1,9 @@
-import {initialState} from './initialState';
+import { initialState } from '../initialState';
 import { createSlice, nanoid } from "@reduxjs/toolkit";
 
-const publicationsSlice = createSlice({
+const postItemSlice = createSlice({
     name: "publications",
-    initialState: initialState.publications,
+    initialState: initialState.postsList,
     redusers: {
         addPublication: {
             reducer(state, action) {
@@ -21,5 +21,5 @@ const publicationsSlice = createSlice({
     }
 })
 
-export const { addPublication} = publicationsSlice.actions;
-export const publicationsReducer = publicationsSlice.reducer;
+export const { addPublication} = postItemSlice.actions;
+export const postItemReducer = postItemSlice.reducer;

@@ -1,16 +1,16 @@
 export const initialState = {
     user: {
-        photo: null,
+        // photo: null,
         login: "",
         email: "",
     },
-    publications: {
+    postsList: {
         items: [],
         isLoading: false,
         error: null,
     },
-    post: {
-        photo: photo,
-        comments: [],
-    }
+    // postItem: {
+    //     photo: photo,
+    //     comments: [],
+    // }
 }
