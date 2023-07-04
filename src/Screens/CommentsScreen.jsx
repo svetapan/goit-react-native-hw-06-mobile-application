@@ -6,20 +6,19 @@ import {
   Keyboard,
   Image,
   TouchableWithoutFeedback,
+  KeyboardAvoidingView,
   ScrollView,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import React, { useState, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
 import { db } from "../../config";
-import {
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
+import { useDispatch } from "react-redux";
+import { addComment } from "../redux/slices/commentSlice";
 
 const CommentsScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [focusedInput, setFocusedInput] = useState(null);
   const [comment, setComment] = useState("");
   const [postItem, setPostItem] = useState(null);
@@ -60,29 +59,13 @@ const CommentsScreen = ({ navigation }) => {
     minute: "2-digit",
   })}`;
 
-  const writeDataToFirestore = async (commentsItem) => {
-    try {
-      const docRef = doc(collection(db, "posts"), postId);
+  const hanlePostComment = () => {
+    const trimmedComment = comment.trim();
 
-      const array = postItem.data.comments;
-      array.push(commentsItem)
+    if (isCommentEntered && trimmedComment !== "") {
+      setComment(trimmedComment);
 
-      await updateDoc(docRef, {
-        comments: array,
-      });
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
-
-  const postComment = () => {
-    if (isCommentEntered) {
-      setComment(comment);
-
-      console.log(comment);
-
-      writeDataToFirestore({ commentText: comment, date: formattedDate });
+      dispatch(addComment({ postId, comment: trimmedComment, formattedDate }));
 
       setComment("");
     }
@@ -105,45 +88,47 @@ const CommentsScreen = ({ navigation }) => {
             <Text style={styles.titleContainerText}>Коментарі</Text>
           </View>
         </View>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.imageContainer}>
+          {postItem && (
+            <>
+              <Image
+                style={styles.imageItem}
+                source={{ uri: postItem.data.previewImage }}
+                resizeMode="cover"
+              />
+            </>
+          )}
+        </View>
+        <ScrollView style={styles.scrollContent}>
           <View style={styles.mainContent}>
             <View style={styles.publicationContainer}>
-              <View style={styles.imageContainer}>
-                {postItem && (
-                  <>
-                    <Image
-                      style={styles.imageItem}
-                      source={{ uri: postItem.data.previewImage }}
-                    />
-                  </>
-                )}
-              </View>
               <View style={styles.commentsContainer}>
-                {postItem && postItem.data.comments.map((comment, index) => (
-                  <View
-                    style={[
-                      styles.commentItem,
-                      index % 2 === 0 ? styles.commentItemReverse : null,
-                    ]}
-                    key={index}
-                  >
-                    <Image
-                      style={styles.commentAvatar}
-                      source={require("../images/avatar-blank.jpg")}
-                    />
+                {postItem &&
+                  postItem.data.comments.map((comment, index) => (
                     <View
                       style={[
-                        styles.comment,
-                        index % 2 === 0 ? styles.commentReverse : null,
+                        styles.commentItem,
+                        index % 2 === 0 ? styles.commentItemReverse : null,
                       ]}
+                      key={index}
                     >
-                      <Text style={styles.commentText}>
-                        {comment.commentText}
-                      </Text>
-                      <Text style={styles.commentDate}>{comment.date}</Text>
+                      <Image
+                        style={styles.commentAvatar}
+                        source={require("../images/avatar-blank.jpg")}
+                      />
+                      <View
+                        style={[
+                          styles.comment,
+                          index % 2 === 0 ? styles.commentReverse : null,
+                        ]}
+                      >
+                        <Text style={styles.commentText}>
+                          {comment.comment}
+                        </Text>
+                        <Text style={styles.commentDate}>{comment.date}</Text>
+                      </View>
                     </View>
-                  </View>
-                ))}
+                  ))}
               </View>
             </View>
           </View>
@@ -160,12 +145,16 @@ const CommentsScreen = ({ navigation }) => {
             value={comment}
             onChangeText={(text) => {
               setComment(text);
-              setIsCommentEntered(text !== "");
+              setIsCommentEntered(text.trim() !== "");
             }}
             onFocus={() => setFocusedInput("comment")}
             onBlur={() => setFocusedInput(null)}
           />
-          <TouchableOpacity style={styles.buttonPost} onPress={postComment}>
+          <TouchableOpacity
+            style={styles.buttonPost}
+            onPress={hanlePostComment}
+            disabled={!isCommentEntered || comment.trim() === ""}
+          >
             <Image
               style={styles.buttonPostIcon}
               source={require("../images/arrow-up.png")}
@@ -184,6 +173,8 @@ const styles = StyleSheet.create({
     position: "relative",
     backgroundColor: "#fff",
     flex: 1,
+    paddingTop: 44,
+    paddingBottom: 22,
   },
   header: {
     position: "relative",
@@ -232,12 +223,18 @@ const styles = StyleSheet.create({
     marginBottom: 82,
   },
   imageContainer: {
+    position: "relative",
+    marginLeft: 16,
+    marginTop: 32,
+    marginRight: 16,
     height: 240,
     borderRadius: 8,
     backgroundColor: "#E8E8E8",
     marginBottom: 32,
   },
   imageItem: {
+    position: "absolute",
+    top: 0,
     width: "100%",
     height: 240,
     borderRadius: 8,
@@ -312,7 +309,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     color: "#000",
   },
-
   buttonPost: {
     position: "absolute",
     right: 24,

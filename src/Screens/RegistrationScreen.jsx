@@ -11,22 +11,20 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-
-import { 
-    createUserWithEmailAndPassword,
-    updateProfile,
-} from 'firebase/auth';
-import { collection, addDoc } from "firebase/firestore";
-import { auth, db } from '../../config';
+import { useDispatch, useSelector } from 'react-redux';
+import { registration, logIn } from '../redux/slices/userSlice';
 
 const RegistrationScreen = ({ navigation }) => {
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-
+  
   const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+  
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user); 
 
   useEffect(() => {
     setIsFormValid(login !== "" && email && password);
@@ -36,56 +34,34 @@ const RegistrationScreen = ({ navigation }) => {
     e.preventDefault();
   };
   
-  const showHidePassword = (e) => {
-    e.preventDefault();
+  const showHidePassword = () => {
     setShowPassword(!showPassword);
   };
   
-  const writeDataToFirestore = async (login,email,password) => {
-        try {
-          const docRef = await addDoc(collection(db, 'users'), {
-            login: login,
-            email: email,
-            password: password,
-          });
-          console.log('Document written with ID: ', docRef.id);
-        } catch (e) {
-          console.error('Error adding document: ', e);
-            throw e;
-        }
-  };
-
-  const registerDB = async (email, password) => {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const signIn = () => {
+  const handleSignIn = () => {
     if (isFormValid) {
       setLogin(login);
       setEmail(email);
       setPassword(password);
 
-      registerDB(email, password).then(() => {
-        updateProfile(auth.currentUser, {
-          displayName: login
-        }).then(() => {
-          navigation.navigate("Home");
-        })
-        setLogin("");
-        setEmail("");
-        setPassword("");
+      dispatch(registration({login, email, password}))
 
-        writeDataToFirestore(login, email, password)
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      setLogin("");
+      setEmail("");
+      setPassword("");
+
+      navigation.navigate("Home");
     }
   };
+
+  console.log(user);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(logIn({ email: user.email, password: user.password }));
+      navigation.navigate("Home");
+    }
+  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -126,7 +102,7 @@ const RegistrationScreen = ({ navigation }) => {
                 value={login}
                 onChangeText={(text) => {
                   setLogin(text);
-                  console.log("Login:", text);
+                  console.log("login:", text);
                 }}
                 onFocus={() => setFocusedInput("login")}
                 onBlur={() => setFocusedInput(null)}
@@ -143,7 +119,7 @@ const RegistrationScreen = ({ navigation }) => {
                 name="email"
                 value={email}
                 onChangeText={(text) => {
-                  setEmail(text);
+                  setEmail(text.trim());
                   console.log("Email:", text);
                 }}
                 onFocus={() => setFocusedInput("email")}
@@ -180,7 +156,7 @@ const RegistrationScreen = ({ navigation }) => {
             <View style={styles.actions}>
               <TouchableOpacity
                 style={styles.button}
-                onPress={signIn}
+                onPress={handleSignIn}
                 disabled={!isFormValid}
               >
                 <Text style={styles.buttonText}>Зареєструватися</Text>

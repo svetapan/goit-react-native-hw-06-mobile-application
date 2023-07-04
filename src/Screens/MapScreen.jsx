@@ -1,6 +1,6 @@
 import React, {useState,useEffect} from "react";
 import { useRoute } from "@react-navigation/native";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { View, Text, StyleSheet,TouchableOpacity,Image, Dimensions } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { db } from "../../config";
 import {
@@ -8,7 +8,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 
-const Home = () => {
+const Home = ({ navigation }) => {
   const [postItem, setPostItem] = useState(null);
   const route = useRoute();
   const { postId } = route.params;
@@ -37,6 +37,20 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
+       <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.buttonReturn}
+            onPress={() => navigation.navigate("Home")}
+          >
+            <Image
+              style={styles.iconReturn}
+              source={require("../images/arrow-return.png")}
+            />
+          </TouchableOpacity>
+          <View style={styles.titleContainer}>
+            <Text style={styles.titleContainerText}>Карта</Text>
+          </View>
+        </View>
       {postItem && (
         <MapView
           style={styles.mapStyle}
@@ -66,8 +80,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
+     paddingTop: 44,
+    paddingBottom: 22,
+  },
+   header: {
+    position: "relative",
+    borderBottomColor: "rgba(0, 0, 0, 0.3)",
+    borderBottomStyle: "solid",
+    borderBottomWidth: 1,
+    hesght: 44,
+  },
+  titleContainer: {
+    width: 175,
+    height: 44,
     justifyContent: "center",
+    alignItems: "center",
+    marginRight: "auto",
+    marginLeft: "auto",
+  },
+  titleContainerText: {
+    fontSize: 17,
+    lineHeight: 22,
+    textAlign: "center",
+    fontFamily: "Roboto-Medium",
+    paddingBottom: 11,
+    paddingTop: 11,
+  },
+  buttonReturn: {
+    position: "absolute",
+    marginTop: 10,
+    height: 24,
+    left: 16,
+  },
+  iconReturn: {
+    width: 24,
+    height: 24,
   },
   mapStyle: {
     width: Dimensions.get("window").width,

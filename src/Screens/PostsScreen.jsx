@@ -8,13 +8,40 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
-import { signOut } from "firebase/auth";
 import { auth, db } from "../../config";
 import { collection, getDocs } from "firebase/firestore";
 
+import { useDispatch, useSelector } from "react-redux";
+import { logOut } from "../redux/slices/userSlice";
+
 const PostsScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
+
+  const getUserFromFirestore = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "users"));
+      const currentUser = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }))
+        .filter(
+          (docData) =>
+            docData.data.email.toLowerCase() === auth.currentUser.email
+        );
+        setUserData(currentUser[0]);
+        return currentUser;
+    } catch (error) {
+      throw error;
+    }
+  };
+  
+  useEffect(() => {
+    getUserFromFirestore();
+    console.log(1, userData);
+  }, []);
 
   const getDataFromFirestore = async () => {
     try {
@@ -35,39 +62,10 @@ const PostsScreen = ({ navigation }) => {
     getDataFromFirestore();
   }, []);
 
-  const logout = async () => {
-    try {
-      navigation.navigate("Login");
-      await signOut(auth);
-      console.log("User logged out successfully");
-    } catch (error) {
-      console.log("Logout error:", error);
-    }
+  const handleLogout = () => {
+    dispatch(logOut());
+    navigation.navigate("Login");
   };
-
-  useEffect(() => {
-    const getUserFromFirestore = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "users"));
-        const currentUser = snapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            data: doc.data(),
-          }))
-          .filter(
-            (docData) =>
-              docData.data.email.toLowerCase() === auth.currentUser.email
-          );
-        setUserData(currentUser[0]);
-        return currentUser;
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    };
-
-    getUserFromFirestore();
-  }, []);
 
   return (
     <View style={styles.page}>
@@ -75,7 +73,10 @@ const PostsScreen = ({ navigation }) => {
         <View style={styles.titleContainer}>
           <Text style={styles.titleContainerText}>Публікації</Text>
         </View>
-        <TouchableOpacity style={styles.buttonLogOut} onPress={() => logout()}>
+        <TouchableOpacity
+          style={styles.buttonLogOut}
+          onPress={() => handleLogout()}
+        >
           <Image
             style={styles.iconLogOut}
             source={require("../images/log-out.png")}
@@ -98,60 +99,68 @@ const PostsScreen = ({ navigation }) => {
           </View>
         </>
       )}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {posts && (
-          <View style={styles.posts}>
-            {posts.map((postItem) => (
-              <View key={postItem.id} style={styles.post}>
-                <TouchableOpacity
-                  style={styles.postImageLink}
-                  onPress={() =>
-                    navigation.navigate("Comments", { postId: postItem.id })
-                  }
-                >
-                  <Image
-                    style={styles.postImage}
-                    source={{ uri: postItem.data.previewImage }}
-                  />
-                </TouchableOpacity>
-                <View style={styles.postContent}>
-                  <Text style={styles.postTitle}>{postItem.data.title}</Text>
-                  <View style={styles.postMeta}>
-                    <TouchableOpacity
-                      style={styles.postComments}
-                      onPress={() => navigation.navigate("Comments", { postId: postItem.id })}
-                    >
-                      <Image
-                        style={styles.postIcon}
-                        source={
-                          postItem.data.comments.length !== 0
-                            ? require("../images/comments.png")
-                            : require("../images/comments-o.png")
-                        }
-                      />
-                      <Text style={styles.postCount}>
-                        {postItem.data.comments.length}
-                      </Text>
-                    </TouchableOpacity>
-                    <View style={styles.postLocationInfo}>
-                      <Image
-                        style={styles.postIcon}
-                        source={require("../images/map.png")}
-                      />
+      <ScrollView style={styles.scrollContent}>
+        <View style={styles.v}>
+          {posts && (
+            <View style={styles.posts}>
+              {posts.map((postItem) => (
+                <View key={postItem.id} style={styles.post}>
+                  <TouchableOpacity
+                    style={styles.postImageLink}
+                    onPress={() =>
+                      navigation.navigate("Comments", { postId: postItem.id })
+                    }
+                  >
+                    <Image
+                      style={styles.postImage}
+                      source={{ uri: postItem.data.previewImage }}
+                    />
+                  </TouchableOpacity>
+                  <View style={styles.postContent}>
+                    <Text style={styles.postTitle}>{postItem.data.title}</Text>
+                    <View style={styles.postMeta}>
                       <TouchableOpacity
-                        onPress={() => navigation.navigate("Map", { postId: postItem.id })}
+                        style={styles.postComments}
+                        onPress={() =>
+                          navigation.navigate("Comments", {
+                            postId: postItem.id,
+                          })
+                        }
                       >
-                        <Text style={styles.postLocationAddress}>
-                          {postItem.data.locationText}
+                        <Image
+                          style={styles.postIcon}
+                          source={
+                            postItem.data.comments.length !== 0
+                              ? require("../images/comments.png")
+                              : require("../images/comments-o.png")
+                          }
+                        />
+                        <Text style={styles.postCount}>
+                          {postItem.data.comments.length}
                         </Text>
                       </TouchableOpacity>
+                      <View style={styles.postLocationInfo}>
+                        <Image
+                          style={styles.postIcon}
+                          source={require("../images/map.png")}
+                        />
+                        <TouchableOpacity
+                          onPress={() =>
+                            navigation.navigate("Map", { postId: postItem.id })
+                          }
+                        >
+                          <Text style={styles.postLocationAddress}>
+                            {postItem.data.locationText}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
-            ))}
-          </View>
-        )}
+              ))}
+            </View>
+          )}
+        </View>
       </ScrollView>
     </View>
   );
@@ -218,19 +227,19 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto-Regular",
     fontSize: 11,
   },
-
+  postsContent: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+  },
   posts: {
     flex: 1,
     position: "relative",
   },
   scrollContent: {
-    position: "absolute",
-    top: 0,
-    left: 0,
     padding: 16,
-    width: "100%",
-    height: "100%",
-    overflow: "scroll",
   },
   post: {
     marginBottom: 32,

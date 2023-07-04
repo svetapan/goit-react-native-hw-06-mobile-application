@@ -9,23 +9,17 @@ import {
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import React, { useState, useEffect } from "react";
-import { Camera, CameraType, getAvailablePictureSizesAsync } from "expo-camera";
+import { Camera, CameraType } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
-
-import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 
-import { auth, db } from "../../config";
-
-import { collection, getDocs, doc, updateDoc, addDoc } from "firebase/firestore";
+import { useDispatch } from "react-redux";
+import { addPost } from "../redux/slices/postsSlice";
 
 const CreatePostsScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [type, setType] = useState(CameraType.back);
-
-  const [userData, setUserData] = useState(null);
-
   const [focusedInput, setFocusedInput] = useState(false);
-
   const [title, setTitle] = useState("");
   const [locationText, setLocationText] = useState("");
   const [location, setLocation] = useState({
@@ -36,34 +30,9 @@ const CreatePostsScreen = ({ navigation }) => {
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
-
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
-
-  useEffect(() => {
-    const getDataFromFirestore = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "users"));
-        const currentUser = snapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            data: doc.data(),
-          }))
-          .filter(
-            (docData) =>
-              docData.data.email.toLowerCase() === auth.currentUser.email
-          );
-        setUserData(currentUser[0]);
-        return currentUser;
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    };
-
-    getDataFromFirestore();
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -85,8 +54,7 @@ const CreatePostsScreen = ({ navigation }) => {
       setLocationText(locationText);
       setLocation(location);
 
-      writeDataToFirestore(previewImage, title, locationText, location)
-
+      dispatch(addPost({previewImage, title, locationText, location}))
       navigation.navigate("Home");
     }
   };
@@ -132,23 +100,6 @@ const CreatePostsScreen = ({ navigation }) => {
   const deletePreviewImage = () => {
     setPreviewImage(null);
     setLocation({ latitude: null, longitude: null });
-  };
-
-  const writeDataToFirestore = async (previewImage, title, locationText, location) => {
-      try {
-        const docRef = await addDoc(collection(db, 'posts'), {
-          previewImage: previewImage,
-          title: title,
-          locationText: locationText,
-          location: location,
-          comments: [],
-          likes: 0,
-        });
-        console.log('Document written with ID: ', docRef.id);
-      } catch (e) {
-        console.error('Error adding document: ', e);
-          throw e;
-      }
   };
 
   return (
