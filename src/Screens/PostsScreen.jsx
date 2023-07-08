@@ -15,32 +15,33 @@ import { useDispatch, useSelector } from "react-redux";
 import { logOut } from "../redux/slices/userSlice";
 
 const PostsScreen = ({ navigation }) => {
+  const user = useSelector((state) => state.user.user); 
   const dispatch = useDispatch();
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
 
-  const getUserFromFirestore = async () => {
+  const getUserFromFirestore = async (userEmail) => {
     try {
       const snapshot = await getDocs(collection(db, "users"));
       const currentUser = snapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          data: doc.data(),
-        }))
-        .filter(
-          (docData) =>
-            docData.data.email.toLowerCase() === auth.currentUser.email
+      .map((doc) => ({
+        id: doc.id,
+        data: doc.data(),
+      }))
+      .filter(
+        (docData) =>
+          docData.data.email.toLowerCase() === userEmail.toLowerCase()
         );
-        setUserData(currentUser[0]);
-        return currentUser;
+        
+      return currentUser[0].data;
     } catch (error) {
       throw error;
     }
   };
-  
+
   useEffect(() => {
-    getUserFromFirestore();
-    console.log(1, userData);
+    const some = getUserFromFirestore(user.email);
+    setUserData(some);
   }, []);
 
   const getDataFromFirestore = async () => {
@@ -53,7 +54,6 @@ const PostsScreen = ({ navigation }) => {
       setPosts(postsList);
       return postsList;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   };
@@ -84,20 +84,20 @@ const PostsScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       {userData && (
-        <>
           <View>
             <View style={styles.user}>
               <Image
                 style={styles.userImage}
                 source={require("../images/avatar.jpg")}
               />
-              <View>
-                <Text style={styles.userName}>{userData.data.login}</Text>
-                <Text style={styles.userEmail}>{auth.currentUser.email}</Text>
-              </View>
+              {userData._j && (
+                <View>
+                  <Text style={styles.userName}>{userData._j.login}</Text>
+                  <Text style={styles.userEmail}>{userData._j.email}</Text>
+                </View>
+              )}
             </View>
           </View>
-        </>
       )}
       <ScrollView style={styles.scrollContent}>
         <View style={styles.v}>

@@ -26,30 +26,27 @@ const App = () => {
   const MainStack = createStackNavigator();
 
   return (
-    <Provider store={store}>
-      <PersistGate persistor={persistor}>
-        <NavigationContainer>
-          <MainStack.Navigator initialRouteName="RegistrationScreen">
-              <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
-              <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-              <MainStack.Screen name="Home" component={Home} options={{ headerShown: false }} />
-              <MainStack.Screen name="PostsScreen" component={PostsScreen} options={{ headerShown: false }}/>
-              <MainStack.Screen name="Map" component={MapScreen} options={{ headerShown: false }}/>
-              <MainStack.Screen name="CreatePosts" component={CreatePostsScreen} options={{ headerShown: false }} />
-              <MainStack.Screen name="Comments" component={CommentsScreen} options={{ headerShown: false }}/>
-              <MainStack.Screen name="Profile" component={ProfileScreen}  options={{ headerShown: false }} />
-          </MainStack.Navigator>
-        </NavigationContainer>
-      </PersistGate>
-    </Provider>
+    <>
+      {fontsLoaded && (
+        <Provider store={store}>
+          <PersistGate persistor={persistor}>
+            <NavigationContainer>
+              <MainStack.Navigator initialRouteName="RegistrationScreen">
+                  <MainStack.Screen name="Registration" component={RegistrationScreen} options={{ headerShown: false }} />
+                  <MainStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+                  <MainStack.Screen name="Home" component={Home} options={{ headerShown: false }} />
+                  <MainStack.Screen name="PostsScreen" component={PostsScreen} options={{ headerShown: false }}/>
+                  <MainStack.Screen name="Map" component={MapScreen} options={{ headerShown: false }}/>
+                  <MainStack.Screen name="CreatePosts" component={CreatePostsScreen} options={{ headerShown: false }} />
+                  <MainStack.Screen name="Comments" component={CommentsScreen} options={{ headerShown: false }}/>
+                  <MainStack.Screen name="Profile" component={ProfileScreen}  options={{ headerShown: false }} />
+              </MainStack.Navigator>
+            </NavigationContainer>
+          </PersistGate>
+        </Provider>
+      )}
+    </>
   );
 }
 
 export default App;
-
-const styles = StyleSheet.create({
- page: {
-   flex: 1,
-   position: 'relative'
- },
-});

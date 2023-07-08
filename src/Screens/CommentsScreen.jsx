@@ -90,13 +90,11 @@ const CommentsScreen = ({ navigation }) => {
         </View>
         <View style={styles.imageContainer}>
           {postItem && (
-            <>
-              <Image
-                style={styles.imageItem}
-                source={{ uri: postItem.data.previewImage }}
-                resizeMode="cover"
-              />
-            </>
+            <Image
+              style={styles.imageItem}
+              source={{ uri: postItem.data.previewImage }}
+              resizeMode="cover"
+            />
           )}
         </View>
         <ScrollView style={styles.scrollContent}>

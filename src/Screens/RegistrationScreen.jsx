@@ -54,8 +54,6 @@ const RegistrationScreen = ({ navigation }) => {
     }
   };
 
-  console.log(user);
-
   useEffect(() => {
     if (user) {
       dispatch(logIn({ email: user.email, password: user.password }));
