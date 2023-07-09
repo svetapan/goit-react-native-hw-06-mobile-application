@@ -4,7 +4,7 @@ import { writeCommentToFirestore } from "../services/commentService";
 
 const commentSlice = createSlice({
   name: "comment",
-  initialState: initialState.comment,
+  initialState,
   reducers: {
     addComment: (state, action) => {
       state.comment = action.payload;

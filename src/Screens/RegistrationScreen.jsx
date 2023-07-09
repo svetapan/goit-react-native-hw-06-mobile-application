@@ -24,7 +24,7 @@ const RegistrationScreen = ({ navigation }) => {
   const [isFormValid, setIsFormValid] = useState(false);
   
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.user); 
+  // const user = useSelector((state) => state.user); 
 
   useEffect(() => {
     setIsFormValid(login !== "" && email && password);
@@ -54,12 +54,12 @@ const RegistrationScreen = ({ navigation }) => {
     }
   };
 
-  useEffect(() => {
-    if (user) {
-      dispatch(logIn({ email: user.email, password: user.password }));
-      navigation.navigate("Home");
-    }
-  }, []);
+  // useEffect(() => {
+    // if (user) {
+    //   dispatch(logIn({ email: user.email, password: user.password }));
+    //   navigation.navigate("Home");
+    // }
+  // }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

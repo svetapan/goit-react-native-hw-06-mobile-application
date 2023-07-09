@@ -4,7 +4,7 @@ import { writeUserToFirestore, registerDB, loginDB, logoutDB } from '../services
 
 const userSlice = createSlice({
   name: 'user',
-  initialState: initialState.user,
+  initialState,
   reducers: {
     registration: (state, action) => {
       state.user = action.payload;
@@ -13,7 +13,9 @@ const userSlice = createSlice({
       writeUserToFirestore(state.user.login, state.user.email, state.user.password)
     },
     logIn: (state, action) => {
+      console.log(state.user);
       state.user = action.payload;
+      
       console.log('login', state.user.email, state.user.password);
       loginDB(state.user.email, state.user.password);
     },
@@ -27,4 +29,3 @@ const userSlice = createSlice({
 
 export const { registration, logIn, logOut, fetchUserData } = userSlice.actions;
 export default userSlice.reducer;
-

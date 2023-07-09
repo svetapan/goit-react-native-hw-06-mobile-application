@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logOut } from "../redux/slices/userSlice";
 
 const PostsScreen = ({ navigation }) => {
-  const user = useSelector((state) => state.user.user); 
+  // const user = useSelector((state) => state.user); 
   const dispatch = useDispatch();
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -39,10 +39,10 @@ const PostsScreen = ({ navigation }) => {
     }
   };
 
-  useEffect(() => {
-    const some = getUserFromFirestore(user.email);
-    setUserData(some);
-  }, []);
+  // useEffect(() => {
+  //   const some = getUserFromFirestore(user.email);
+  //   setUserData(some);
+  // }, []);
 
   const getDataFromFirestore = async () => {
     try {
@@ -83,7 +83,7 @@ const PostsScreen = ({ navigation }) => {
           />
         </TouchableOpacity>
       </View>
-      {userData && (
+      {/* {userData && (
           <View>
             <View style={styles.user}>
               <Image
@@ -98,7 +98,7 @@ const PostsScreen = ({ navigation }) => {
               )}
             </View>
           </View>
-      )}
+      )} */}
       <ScrollView style={styles.scrollContent}>
         <View style={styles.v}>
           {posts && (

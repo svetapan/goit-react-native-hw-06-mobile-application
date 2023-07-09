@@ -14,8 +14,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logIn } from '../redux/slices/userSlice';
 
 const LoginScreen = ({ navigation }) => {
-  const user = useSelector((state) => state.user.user); 
   const dispatch = useDispatch();
+
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -35,7 +35,6 @@ const LoginScreen = ({ navigation }) => {
     if (isFormValid) {
       setEmail(email);
       setPassword(password);
-      
       dispatch(logIn({email, password}))
       navigation.navigate("Home");
       setEmail("");
