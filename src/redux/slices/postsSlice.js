@@ -4,7 +4,7 @@ import { writePostToFirestore } from "../services/postsService";
 
 const postSlice = createSlice({
   name: "post",
-  initialState: initialState.post,
+  initialState,
   reducers: {
     addPost: (state, action) => {
       state.post = action.payload;
