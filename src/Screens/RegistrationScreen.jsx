@@ -13,10 +13,13 @@ import {
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { registration, logIn } from '../redux/slices/userSlice';
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../config";
 
 const RegistrationScreen = ({ navigation }) => {
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
   
   const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
@@ -26,6 +29,8 @@ const RegistrationScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user); 
 
+  console.log(user);
+  
   useEffect(() => {
     setIsFormValid(login !== "" && email && password);
   }, [login, email, password]);
@@ -50,12 +55,28 @@ const RegistrationScreen = ({ navigation }) => {
       setEmail("");
       setPassword("");
 
-      navigation.navigate("Home");
+      // navigation.navigate("Home");
     }
   };
 
   useEffect(() => {
-    if (user) {
+    onAuthStateChanged(auth, async (user) =>{
+      if (user) {
+        const userId = user.id;
+        // const data = await getUserData(userId);
+        // dispatch(updateUserData({ ...data, userId }));
+        // navigation.navigate("Home");
+        // setIsLogged(true);
+      } else {
+        // navigation.navigate("Login");
+        // setIsLogged(false);
+      }
+    })
+  }, []);
+
+  useEffect(() => {
+    if (isLogged) {
+      console.log(222);
       dispatch(logIn({ email: user.email, password: user.password }));
       navigation.navigate("Home");
     }
