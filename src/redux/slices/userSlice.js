@@ -6,7 +6,7 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    registration: (state, action) => {
+    registration: async (state, action) => {
       state.user = action.payload;
       console.log('registration', state.user);
       registerDB(state.user.email, state.user.password)
@@ -16,11 +16,11 @@ const userSlice = createSlice({
       console.log(state.user);
       state.user = action.payload;
       
-      console.log('login', state.user.email, state.user.password);
+      console.log('login:', state.user.email, 'password:', state.user.password);
       loginDB(state.user.email, state.user.password);
     },
     logOut: (state) => {
-      state.user = null;
+      state.user = {};
       console.log('logout', state.user);
       logoutDB();
     },

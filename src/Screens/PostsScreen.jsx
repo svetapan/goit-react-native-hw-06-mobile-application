@@ -8,15 +8,16 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
-import { auth, db } from "../../config";
+import { db } from "../../config";
 import { collection, getDocs } from "firebase/firestore";
 
 import { useDispatch, useSelector } from "react-redux";
 import { logOut } from "../redux/slices/userSlice";
 
 const PostsScreen = ({ navigation }) => {
-  // const user = useSelector((state) => state.user); 
+  const user = useSelector((state) => state.user.user); 
   const dispatch = useDispatch();
+
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
 
@@ -39,10 +40,10 @@ const PostsScreen = ({ navigation }) => {
     }
   };
 
-  // useEffect(() => {
-  //   const some = getUserFromFirestore(user.email);
-  //   setUserData(some);
-  // }, []);
+  useEffect(() => {
+    const some = getUserFromFirestore(user.email);
+    setUserData(some);
+  }, []);
 
   const getDataFromFirestore = async () => {
     try {
@@ -83,14 +84,14 @@ const PostsScreen = ({ navigation }) => {
           />
         </TouchableOpacity>
       </View>
-      {/* {userData && (
+      {userData && userData._j && (
           <View>
             <View style={styles.user}>
               <Image
                 style={styles.userImage}
                 source={require("../images/avatar.jpg")}
               />
-              {userData._j && (
+              {userData && userData._j && (
                 <View>
                   <Text style={styles.userName}>{userData._j.login}</Text>
                   <Text style={styles.userEmail}>{userData._j.email}</Text>
@@ -98,7 +99,7 @@ const PostsScreen = ({ navigation }) => {
               )}
             </View>
           </View>
-      )} */}
+      )}
       <ScrollView style={styles.scrollContent}>
         <View style={styles.v}>
           {posts && (
