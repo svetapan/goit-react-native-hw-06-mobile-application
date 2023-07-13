@@ -27,25 +27,25 @@ const CommentsScreen = ({ navigation }) => {
   const route = useRoute();
   const { postId } = route.params;
 
+  const getDataFromFirestore = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "posts"));
+      const post = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }))
+        .filter((docData) => docData.id === postId);
+
+      setPostItem(post[0]);
+      return post;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
-    const getDataFromFirestore = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "posts"));
-        const post = snapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            data: doc.data(),
-          }))
-          .filter((docData) => docData.id === postId);
-
-        setPostItem(post[0]);
-        return post;
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    };
-
     getDataFromFirestore();
   }, []);
 
@@ -68,6 +68,9 @@ const CommentsScreen = ({ navigation }) => {
       dispatch(addComment({ postId, comment: trimmedComment, formattedDate }));
 
       setComment("");
+      setTimeout(()=>{
+        getDataFromFirestore();
+      }, 1000)
     }
   };
 

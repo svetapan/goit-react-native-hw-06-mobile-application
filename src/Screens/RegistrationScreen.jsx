@@ -11,8 +11,8 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from 'react-redux';
-import { registration, logIn } from '../redux/slices/userSlice';
+import { useDispatch, useSelector } from "react-redux";
+import { registration, logIn } from "../redux/slices/userSlice";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../config";
 
@@ -20,17 +20,15 @@ const RegistrationScreen = ({ navigation }) => {
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
-  
+
   const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
-  
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.user); 
 
-  console.log(user);
-  
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+
   useEffect(() => {
     setIsFormValid(login !== "" && email && password);
   }, [login, email, password]);
@@ -38,48 +36,34 @@ const RegistrationScreen = ({ navigation }) => {
   const addImage = (e) => {
     e.preventDefault();
   };
-  
+
   const showHidePassword = () => {
     setShowPassword(!showPassword);
   };
-  
+
   const handleSignIn = () => {
     if (isFormValid) {
-      setLogin(login);
-      setEmail(email);
-      setPassword(password);
-
-      dispatch(registration({login, email, password}))
+      dispatch(
+        registration({ login: login, email: email, password: password })
+      );
 
       setLogin("");
       setEmail("");
       setPassword("");
 
-      // navigation.navigate("Home");
+      navigation.navigate("Home");
     }
   };
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) =>{
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         const userId = user.id;
-        // const data = await getUserData(userId);
-        // dispatch(updateUserData({ ...data, userId }));
-        // navigation.navigate("Home");
-        // setIsLogged(true);
       } else {
-        // navigation.navigate("Login");
-        // setIsLogged(false);
+        navigation.navigate("Login");
+        setIsLogged(false);
       }
-    })
-  }, []);
-
-  useEffect(() => {
-    if (isLogged) {
-      console.log(222);
-      dispatch(logIn({ email: user.email, password: user.password }));
-      navigation.navigate("Home");
-    }
+    });
   }, []);
 
   return (
@@ -183,10 +167,10 @@ const RegistrationScreen = ({ navigation }) => {
               <View style={styles.redirection}>
                 <Text style={styles.redirectionText}>Вже є акаунт?</Text>
                 <TouchableOpacity>
-                  <Text 
+                  <Text
                     style={styles.redirectionLink}
                     onPress={() => navigation.navigate("Login")}
-                    >
+                  >
                     Увійти
                   </Text>
                 </TouchableOpacity>

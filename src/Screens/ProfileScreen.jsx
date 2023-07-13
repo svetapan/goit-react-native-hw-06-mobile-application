@@ -14,37 +14,42 @@ import {
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../../config";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logOut } from "../redux/slices/userSlice";
 
 const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
   const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
 
+  const getUserFromFirestore = async (userEmail) => {
+    try {
+      const snapshot = await getDocs(collection(db, "users"));
+      const currentUser = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }))
+        .filter(
+          (docData) =>
+            docData.data.email.toLowerCase() === userEmail.toLowerCase()
+        );
+
+      return currentUser[0].data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   useEffect(() => {
-    const getDataFromFirestore = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "users"));
-        const currentUser = snapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            data: doc.data(),
-          }))
-          .filter(
-            (docData) =>
-              docData.data.email.toLowerCase() === auth.currentUser.email
-          );
-        setUserData(currentUser[0]);
-        return currentUser;
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
+    const fetchUserData = async () => {
+      const userData = await getUserFromFirestore(user.email);
+      setUserData(userData);
     };
 
-    getDataFromFirestore();
-  }, []);
+    fetchUserData();
+  }, [user]);
 
   useEffect(() => {
     const getDataFromFirestore = async () => {
@@ -130,9 +135,11 @@ const ProfileScreen = ({ navigation }) => {
                 />
               </TouchableOpacity>
             </View>
-            {userData && (
+            {user && (
               <View style={styles.titleContainer}>
-                <Text style={styles.nameTitle}>{userData.data.login}</Text>
+                <Text style={styles.nameTitle}>
+                  {!userData && user.lrogin ? user.login : userData.login}
+                </Text>
               </View>
             )}
             <ScrollView contentContainerStyle={styles.scrollContent}>

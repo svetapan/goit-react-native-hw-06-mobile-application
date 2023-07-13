@@ -10,8 +10,10 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useDispatch } from 'react-redux';
-import { logIn } from '../redux/slices/userSlice';
+import { useDispatch } from "react-redux";
+import { logIn } from "../redux/slices/userSlice";
+import { db } from "../../config";
+import { collection, getDocs } from "firebase/firestore";
 
 const LoginScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -31,14 +33,41 @@ const LoginScreen = ({ navigation }) => {
     setShowPassword(!showPassword);
   };
 
-  const handleSignIn = () => {
+  const getUserFromFirestore = async (userEmail, password) => {
+    try {
+      const snapshot = await getDocs(collection(db, "users"));
+      const currentUser = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }))
+        .filter(
+          (docData) =>
+            docData.data.email.toLowerCase() === userEmail.toLowerCase() &&
+            docData.data.password === password
+        );
+
+      return currentUser[0].data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleSignIn = async () => {
     if (isFormValid) {
       setEmail(email);
       setPassword(password);
-      dispatch(logIn({email, password}))
-      navigation.navigate("Home");
-      setEmail("");
-      setPassword("");
+      dispatch(logIn({ email, password }));
+      try {
+        const findUser = await getUserFromFirestore(email, password);
+        if (findUser) {
+          navigation.navigate("Home");
+        }
+        setEmail("");
+        setPassword("");
+      } catch (error) {
+        console.log("Error fetching user data:", error);
+      }
     }
   };
 

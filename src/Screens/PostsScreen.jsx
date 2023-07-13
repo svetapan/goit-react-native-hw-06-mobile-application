@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
-import { db } from "../../config";
+import { db, auth } from "../../config";
 import { collection, getDocs } from "firebase/firestore";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -41,25 +41,29 @@ const PostsScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    const some = getUserFromFirestore(user.email);
-    setUserData(some);
-  }, []);
+    const fetchUserData = async () => {
+      const userData = await getUserFromFirestore(user.email);
+      setUserData(userData);
+    };
 
-  const getDataFromFirestore = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, "posts"));
-      const postsList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        data: doc.data(),
-      }));
-      setPosts(postsList);
-      return postsList;
-    } catch (error) {
-      throw error;
-    }
-  };
-
+    fetchUserData();
+  }, [user]);
+  
   useEffect(() => {
+    const getDataFromFirestore = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "posts"));
+        const postsList = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          data: doc.data(),
+        }));
+        setPosts(postsList);
+        return postsList;
+      } catch (error) {
+        throw error;
+      }
+    };
+    
     getDataFromFirestore();
   }, []);
 
@@ -84,21 +88,21 @@ const PostsScreen = ({ navigation }) => {
           />
         </TouchableOpacity>
       </View>
-      {userData && userData._j && (
-          <View>
-            <View style={styles.user}>
-              <Image
-                style={styles.userImage}
-                source={require("../images/avatar.jpg")}
-              />
-              {userData && userData._j && (
-                <View>
-                  <Text style={styles.userName}>{userData._j.login}</Text>
-                  <Text style={styles.userEmail}>{userData._j.email}</Text>
-                </View>
-              )}
-            </View>
+      {user && (
+        <View>
+          <View style={styles.user}>
+            <Image
+              style={styles.userImage}
+              source={require("../images/avatar.jpg")}
+            />
+              <View>
+                <Text style={styles.userName}>
+                  {!userData && user.login ? user.login : userData.login }
+                </Text>
+                <Text style={styles.userEmail}>{user.email}</Text>
+              </View>
           </View>
+        </View>
       )}
       <ScrollView style={styles.scrollContent}>
         <View style={styles.v}>

@@ -1,27 +1,46 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { initialState } from '../initialState';
-import { writeUserToFirestore, registerDB, loginDB, logoutDB } from '../services/userService';
+import { createSlice } from "@reduxjs/toolkit";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { initialState } from "../initialState";
+import { logoutDB, writeUserToFirestore } from "../services/userService";
+import { auth } from "../../../config";
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
-    registration: async (state, action) => {
-      state.user = action.payload;
-      console.log('registration', state.user);
-      registerDB(state.user.email, state.user.password)
-      writeUserToFirestore(state.user.login, state.user.email, state.user.password)
+    registration: {
+      reducer: (state, action) => {
+        state.user = action.payload;
+      },
+      prepare: ({ login, email, password }) => {
+        const regtoData = async ({ login, email, password }) =>{
+          const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          await updateProfile(auth.currentUser, {
+            displayName: login,
+          });
+        }
+        
+        regtoData();
+        writeUserToFirestore(login, email, password);
+        
+        return {  payload: { login, email, password } };
+      },
     },
-    logIn: (state, action) => {
-      console.log(state.user);
-      state.user = action.payload;
-      
-      console.log('login:', state.user.email, 'password:', state.user.password);
-      loginDB(state.user.email, state.user.password);
+    logIn: {
+      reducer: (state, action) => {
+        state.user = action.payload;
+      },
+      prepare: (user) => {
+        return { payload: { email: user.email, password: user.password } };
+      },
     },
     logOut: (state) => {
       state.user = {};
-      console.log('logout', state.user);
+      console.log("logout", state.user);
       logoutDB();
     },
   },

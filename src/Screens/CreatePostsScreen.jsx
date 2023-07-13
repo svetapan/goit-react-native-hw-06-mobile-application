@@ -55,7 +55,10 @@ const CreatePostsScreen = ({ navigation }) => {
       setLocation(location);
 
       dispatch(addPost({previewImage, title, locationText, location}))
-      navigation.navigate("Home");
+
+      setTimeout(() => {
+        navigation.navigate("Home");
+      }, 1000)
     }
   };
 
