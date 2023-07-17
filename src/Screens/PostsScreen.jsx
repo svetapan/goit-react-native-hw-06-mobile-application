@@ -9,46 +9,22 @@ import {
 import React, { useState, useEffect } from "react";
 
 import { db, auth } from "../../config";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
 
-import { useDispatch, useSelector } from "react-redux";
-import { logOut } from "../redux/slices/userSlice";
-
 const PostsScreen = ({ navigation }) => {
-  const user = useSelector((state) => state.user.user); 
-  const dispatch = useDispatch();
-
-  const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
-
-  const getUserFromFirestore = async (userEmail) => {
-    try {
-      const snapshot = await getDocs(collection(db, "users"));
-      const currentUser = snapshot.docs
-      .map((doc) => ({
-        id: doc.id,
-        data: doc.data(),
-      }))
-      .filter(
-        (docData) =>
-          docData.data.email.toLowerCase() === userEmail.toLowerCase()
-        );
-        
-      return currentUser[0].data;
-    } catch (error) {
-      throw error;
-    }
-  };
+  const [userData, setUserData] = useState([]);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userData = await getUserFromFirestore(user.email);
-      setUserData(userData);
-    };
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const user = auth.currentUser;
+        setUserData(user);
+      }
+    });
+  }, []);
 
-    fetchUserData();
-  }, [user]);
-  
   useEffect(() => {
     const getDataFromFirestore = async () => {
       try {
@@ -63,12 +39,13 @@ const PostsScreen = ({ navigation }) => {
         throw error;
       }
     };
-    
+
     getDataFromFirestore();
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logOut());
+  const handleLogout = async () => {
+    await signOut(auth);
+    setUserData([])
     navigation.navigate("Login");
   };
 
@@ -88,22 +65,20 @@ const PostsScreen = ({ navigation }) => {
           />
         </TouchableOpacity>
       </View>
-      {user && (
-        <View>
-          <View style={styles.user}>
-            <Image
-              style={styles.userImage}
-              source={require("../images/avatar.jpg")}
-            />
-              <View>
-                <Text style={styles.userName}>
-                  {!userData && user.login ? user.login : userData.login }
-                </Text>
-                <Text style={styles.userEmail}>{user.email}</Text>
-              </View>
+      <View>
+        <View style={styles.user}>
+          <Image
+            style={styles.userImage}
+            source={require("../images/avatar.jpg")}
+          />
+          <View>
+            <Text style={styles.userName}>
+              {userData.displayName && userData.displayName}
+            </Text>
+            <Text style={styles.userEmail}>{userData.email}</Text>
           </View>
         </View>
-      )}
+      </View>
       <ScrollView style={styles.scrollContent}>
         <View style={styles.v}>
           {posts && (

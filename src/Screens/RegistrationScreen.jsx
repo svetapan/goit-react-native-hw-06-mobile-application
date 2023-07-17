@@ -11,10 +11,9 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { registration, logIn } from "../redux/slices/userSlice";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, updateProfile } from "firebase/auth";
 import { auth } from "../../config";
+import { registerDB, updateUserProfile } from "../redux/services/userService";
 
 const RegistrationScreen = ({ navigation }) => {
   const [focusedInput, setFocusedInput] = useState(null);
@@ -25,9 +24,6 @@ const RegistrationScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
-
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
 
   useEffect(() => {
     setIsFormValid(login !== "" && email && password);
@@ -41,30 +37,25 @@ const RegistrationScreen = ({ navigation }) => {
     setShowPassword(!showPassword);
   };
 
-  const handleSignIn = () => {
-    if (isFormValid) {
-      dispatch(
-        registration({ login: login, email: email, password: password })
-      );
-
-      setLogin("");
-      setEmail("");
-      setPassword("");
-
-      navigation.navigate("Home");
-    }
-  };
-
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
-        const userId = user.id;
-      } else {
-        navigation.navigate("Login");
-        setIsLogged(false);
+        navigation.navigate("Home");
+        setLogin("");
+        setEmail("");
+        setPassword("");
       }
     });
   }, []);
+
+  const handleSignIn = async () => {
+    if (isFormValid) {
+      await registerDB(email, password);
+      updateProfile(auth.currentUser, {
+        displayName: login
+      });
+    }
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

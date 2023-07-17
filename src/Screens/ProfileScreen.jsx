@@ -15,41 +15,22 @@ import React, { useState, useEffect } from "react";
 import { auth, db } from "../../config";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { useDispatch, useSelector } from "react-redux";
-import { logOut } from "../redux/slices/userSlice";
+
+import { signOut, onAuthStateChanged } from "firebase/auth";
 
 const ProfileScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.user);
-  const [userData, setUserData] = useState(null);
   const [posts, setPosts] = useState([]);
-
-  const getUserFromFirestore = async (userEmail) => {
-    try {
-      const snapshot = await getDocs(collection(db, "users"));
-      const currentUser = snapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          data: doc.data(),
-        }))
-        .filter(
-          (docData) =>
-            docData.data.email.toLowerCase() === userEmail.toLowerCase()
-        );
-
-      return currentUser[0].data;
-    } catch (error) {
-      throw error;
-    }
-  };
+  const [userData, setUserData] = useState([]);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userData = await getUserFromFirestore(user.email);
-      setUserData(userData);
-    };
-
-    fetchUserData();
-  }, [user]);
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const user = auth.currentUser;
+        setUserData(user);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const getDataFromFirestore = async () => {
@@ -74,8 +55,9 @@ const ProfileScreen = ({ navigation }) => {
     e.preventDefault();
   };
 
-  const handleLogout = () => {
-    dispatch(logOut());
+  const handleLogout = async () => {
+    await signOut(auth);
+    setUserData([])
     navigation.navigate("Login");
   };
 
@@ -135,13 +117,11 @@ const ProfileScreen = ({ navigation }) => {
                 />
               </TouchableOpacity>
             </View>
-            {user && (
-              <View style={styles.titleContainer}>
-                <Text style={styles.nameTitle}>
-                  {!userData && user.lrogin ? user.login : userData.login}
-                </Text>
-              </View>
-            )}
+            <View style={styles.titleContainer}>
+              <Text style={styles.nameTitle}>
+                {userData.displayName && userData.displayName}
+              </Text>
+            </View>
             <ScrollView contentContainerStyle={styles.scrollContent}>
               {posts && (
                 <View style={styles.posts}>

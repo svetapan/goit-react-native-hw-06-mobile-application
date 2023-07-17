@@ -54,20 +54,20 @@ const Home = ({ navigation, route }) => {
               <TabBarIcon routeName={route.name} focused={focused} />
             ),
             headerShown: false,
-            tabBarStyle:{
+            tabBarStyle: {
               borderTopColor: "rgba(0, 0, 0, 0.2)",
               borderTopStyle: "solid",
               borderTopWidth: 1,
               paddingTop: 9,
               paddingBottom: 9,
-              justifyContent: 'center',
-              alignItems: 'center',
+              justifyContent: "center",
+              alignItems: "center",
             },
-            tabBarItemStyle:{
+            tabBarItemStyle: {
               margin: 9,
               flex: 0,
               width: 70,
-            }
+            },
           })}
           tabBarOptions={{
             activeTintColor: "#FF6C00",

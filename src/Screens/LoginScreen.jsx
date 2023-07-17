@@ -10,14 +10,11 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { logIn } from "../redux/slices/userSlice";
-import { db } from "../../config";
-import { collection, getDocs } from "firebase/firestore";
+import { auth } from "../../config";
+import { onAuthStateChanged } from "firebase/auth";
+import { loginDB } from "../redux/services/userService";
 
 const LoginScreen = ({ navigation }) => {
-  const dispatch = useDispatch();
-
   const [focusedInput, setFocusedInput] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -33,40 +30,25 @@ const LoginScreen = ({ navigation }) => {
     setShowPassword(!showPassword);
   };
 
-  const getUserFromFirestore = async (userEmail, password) => {
-    try {
-      const snapshot = await getDocs(collection(db, "users"));
-      const currentUser = snapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          data: doc.data(),
-        }))
-        .filter(
-          (docData) =>
-            docData.data.email.toLowerCase() === userEmail.toLowerCase() &&
-            docData.data.password === password
-        );
-
-      return currentUser[0].data;
-    } catch (error) {
-      throw error;
-    }
-  };
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigation.navigate("Home");
+        setEmail("");
+        setPassword("");
+      }
+    });
+  }, []);
 
   const handleSignIn = async () => {
     if (isFormValid) {
       setEmail(email);
       setPassword(password);
-      dispatch(logIn({ email, password }));
+
       try {
-        const findUser = await getUserFromFirestore(email, password);
-        if (findUser) {
-          navigation.navigate("Home");
-        }
-        setEmail("");
-        setPassword("");
+        await loginDB(email, password);
       } catch (error) {
-        console.log("Error fetching user data:", error);
+        console.log("No user in db");
       }
     }
   };

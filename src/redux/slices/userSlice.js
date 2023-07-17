@@ -1,7 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { initialState } from "../initialState";
-import { logoutDB, writeUserToFirestore } from "../services/userService";
+import {
+  logoutDB,
+  writeUserToFirestore,
+  registerDB,
+  loginDB,
+  updateUserProfile,
+} from "../services/userService";
 import { auth } from "../../../config";
 
 const userSlice = createSlice({
@@ -12,30 +17,30 @@ const userSlice = createSlice({
       reducer: (state, action) => {
         state.user = action.payload;
       },
-      prepare: ({ login, email, password }) => {
-        const regtoData = async ({ login, email, password }) =>{
-          const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-          );
-          await updateProfile(auth.currentUser, {
-            displayName: login,
-          });
-        }
-        
-        regtoData();
-        writeUserToFirestore(login, email, password);
-        
-        return {  payload: { login, email, password } };
+      prepare: async ({ login, email, password }) => {
+        await registerDB(email, password);
+        await updateUserProfile({
+          displayName: login,
+        });
+
+        const userUpdateSucces = auth.currentUser;
+        console.log("Registration and login into", auth.currentUser.email);
+        return userUpdateSucces;
       },
     },
     logIn: {
       reducer: (state, action) => {
+        console.log(1, action.payload);
+
         state.user = action.payload;
       },
-      prepare: (user) => {
-        return { payload: { email: user.email, password: user.password } };
+      prepare: async (user) => {
+        await loginDB(user.email, user.password);
+        const userUpdateSucces = auth.currentUser;
+        console.log("Logedin into", auth.currentUser);
+        console.log(2, action.payload);
+        return userUpdateSucces;
+        // return { payload: { email: user.email, password: user.password } };
       },
     },
     logOut: (state) => {
