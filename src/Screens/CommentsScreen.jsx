@@ -6,7 +6,6 @@ import {
   Keyboard,
   Image,
   TouchableWithoutFeedback,
-  KeyboardAvoidingView,
   ScrollView,
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
@@ -68,9 +67,9 @@ const CommentsScreen = ({ navigation }) => {
       dispatch(addComment({ postId, comment: trimmedComment, formattedDate }));
 
       setComment("");
-      setTimeout(()=>{
+      setTimeout(() => {
         getDataFromFirestore();
-      }, 1000)
+      }, 1000);
     }
   };
 

@@ -6,6 +6,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import React, { useState, useEffect } from "react";
 
 import { db, auth } from "../../config";
@@ -25,27 +26,29 @@ const PostsScreen = ({ navigation }) => {
     });
   }, []);
 
-  useEffect(() => {
-    const getDataFromFirestore = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "posts"));
-        const postsList = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          data: doc.data(),
-        }));
-        setPosts(postsList);
-        return postsList;
-      } catch (error) {
-        throw error;
-      }
-    };
+  useFocusEffect(
+    React.useCallback(() => {
+      const getDataFromFirestore = async () => {
+        try {
+          const snapshot = await getDocs(collection(db, "posts"));
+          const postsList = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            data: doc.data(),
+          }));
+          setPosts(postsList);
+          return postsList;
+        } catch (error) {
+          throw error;
+        }
+      };
 
-    getDataFromFirestore();
-  }, []);
+      getDataFromFirestore();
+    }, [])
+  );
 
   const handleLogout = async () => {
     await signOut(auth);
-    setUserData([])
+    setUserData([]);
     navigation.navigate("Login");
   };
 

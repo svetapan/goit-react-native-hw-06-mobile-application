@@ -13,7 +13,7 @@ import {
 import React, { useState, useEffect } from "react";
 import { onAuthStateChanged, updateProfile } from "firebase/auth";
 import { auth } from "../../config";
-import { registerDB, updateUserProfile } from "../redux/services/userService";
+import { registerDB } from "../redux/services/userService";
 
 const RegistrationScreen = ({ navigation }) => {
   const [focusedInput, setFocusedInput] = useState(null);
@@ -52,7 +52,7 @@ const RegistrationScreen = ({ navigation }) => {
     if (isFormValid) {
       await registerDB(email, password);
       updateProfile(auth.currentUser, {
-        displayName: login
+        displayName: login,
       });
     }
   };

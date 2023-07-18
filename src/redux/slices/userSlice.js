@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import { initialState } from "../initialState";
 import {
   logoutDB,
-  writeUserToFirestore,
   registerDB,
   loginDB,
   updateUserProfile,
@@ -40,7 +39,6 @@ const userSlice = createSlice({
         console.log("Logedin into", auth.currentUser);
         console.log(2, action.payload);
         return userUpdateSucces;
-        // return { payload: { email: user.email, password: user.password } };
       },
     },
     logOut: (state) => {
