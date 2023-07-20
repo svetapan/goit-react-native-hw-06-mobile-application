@@ -22,10 +22,16 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "softwareKeyboardLayoutMode": "pan" 
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.svitlanapanenko.AwesomeProject"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "58e4dd3a-11c0-4108-8baa-c7a3380713ff"
+      }
     }
   }
 }
